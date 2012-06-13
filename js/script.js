@@ -2,7 +2,7 @@ var ctx = $('#canvas')[0].getContext("2d");
 
 var GOL = GOL ||  {};
 
-GOL.BOARD_SIZE = 50;
+GOL.BOARD_SIZE = 60;
 GOL.DOT_SIZE = 15;
 
 GOL.gameModel = function() {
@@ -66,7 +66,7 @@ GOL.gameModel = function() {
                 if(i === 0 && k === 0) {
                     continue;
                 }
-                if(x+i < 0 || y+i < 0 || x+i > 49 || y+i > 49) {
+                if(x+i < 0 || y+i < 0 || x+i > GOL.BOARD_SIZE - 1 || y+i > GOL.BOARD_SIZE - 1) {
                     continue;
                 }
                 if(board[x+i][y+k] === 1) {
@@ -164,28 +164,88 @@ GOL.gameDrawer = function(ctx, gameModel) {
     }
 }(ctx, GOL.gameModel);
 
+GOL.gameController = function() {
+    var updateSpeed = 1000;
+    var gameRunning = false;
+    var currentIntervalId = null;
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+    var gameTick = function() {
+        GOL.gameModel.tick();
+        GOL.gameDrawer.drawGame();
+    };
 
-function randomLayout() {
-    for(var i = 0; i < 50; i++) {
-        GOL.gameModel.setDot(getRandomInt(0, 49), getRandomInt(0, 49));
+    var startGame = function() {
+        console.log("start game");
+        if(!gameRunning) {
+            gameRunning = true;
+            currentIntervalId = setInterval(gameTick, updateSpeed);
+        }
+    };
+
+    var stopGame = function() {
+        gameRunning = false;
+        if(currentIntervalId !== null) {
+            clearInterval(currentIntervalId);
+            currentIntervalId = null;
+        }
+    };
+
+    var resetGame = function() {
+        stopGame();
+        GOL.gameModel.resetGame();
+        GOL.gameDrawer.drawGame();
+    };
+
+
+    var setUpdateSpeed = function(newUpdateSpeed) {
+        console.log("set new update speed");
+        stopGame();
+        updateSpeed = newUpdateSpeed;
+        startGame();
+    };
+
+    var getUpdateSpeed = function() {
+        return updateSpeed;
+    };
+
+    return {
+        startGame: startGame,
+        stopGame: stopGame,
+        resetGame: resetGame,
+        getUpdateSpeed: getUpdateSpeed,
+        setUpdateSpeed: setUpdateSpeed
     }
-}
 
-function exampleGameTick() {
-    //GOL.gameModel.resetGame();
-    GOL.gameModel.tick();
-    GOL.gameDrawer.drawGame();
-}
+}();
 
 GOL.gameDrawer.drawGame();
 
 $("#startGame").click(function(evt) {
-    console.log("start game");
-    var intervalId = setInterval(exampleGameTick, 1000);
+    GOL.gameController.startGame();
+});
+
+$("#stopGame").click(function(evt){
+    GOL.gameController.stopGame();
+});
+
+$("#resetGame").click(function(evt){
+    GOL.gameController.resetGame();
+});
+
+$("#gameSpeedInput").change(function(evt) {
+    var inputSpeed = $("#gameSpeedInput").val();
+    var newSpeed = parseInt(inputSpeed);
+    if(isNaN(newSpeed)) {
+        newSpeed = GOL.gameController.getUpdateSpeed();
+    } else if(newSpeed < 10) {
+        newSpeed = 10;
+    } else if(newSpeed > 2000) {
+        newSpeed = 2000;
+    }
+
+    GOL.gameController.setUpdateSpeed(newSpeed);
+    $("#gameSpeedInput").val(newSpeed);
+    console.log(newSpeed);
 });
 
 $("#canvas").mouseup(function(evt) {

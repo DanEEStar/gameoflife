@@ -2,16 +2,21 @@ var ctx = $('#canvas')[0].getContext("2d");
 
 var GOL = GOL ||  {};
 
+GOL.BOARD_SIZE = 50;
+GOL.DOT_SIZE = 15;
+
 GOL.gameModel = function() {
 
-    var BOARD_SIZE = 50;
     var board = undefined;
 
+    /**
+     * @return a new BOARD_SIZE * BOARD_SIZE multi-dimensional array initialized with all zeros
+     */
     var initBoard = function() {
         var newBoard = [];
-        for (var i = 0; i < BOARD_SIZE; i++) {
+        for (var i = 0; i < GOL.BOARD_SIZE; i++) {
             newBoard[i] = [];
-            for(var k = 0; k < BOARD_SIZE; k++) {
+            for(var k = 0; k < GOL.BOARD_SIZE; k++) {
                 newBoard[i][k] = 0;
             }
         };
@@ -37,16 +42,16 @@ GOL.gameModel = function() {
 
     var convertMouseToMap = function(x, y) {
         return {
-            x: Math.floor(x / 10),
-            y: Math.floor(y / 10)
+            x: Math.floor(x / GOL.DOT_SIZE),
+            y: Math.floor(y / GOL.DOT_SIZE)
         };
     };
 
-    var getBoard = function() {
+    var copyBoard = function() {
         var boardCopy = [];
-        for(var i = 0; i < BOARD_SIZE; i++) {
+        for(var i = 0; i < GOL.BOARD_SIZE; i++) {
             boardCopy[i] = [];
-            for(var k = 0; k < BOARD_SIZE; k++) {
+            for(var k = 0; k < GOL.BOARD_SIZE; k++) {
                 boardCopy[i][k] = board[i][k];
             }
         }
@@ -76,8 +81,8 @@ GOL.gameModel = function() {
         console.log("tick");
         var newBoard = initBoard();
         // implement the game rules
-        for(var i = 0; i < BOARD_SIZE; i++) {
-            for(var k = 0; k < BOARD_SIZE; k++) {
+        for(var i = 0; i < GOL.BOARD_SIZE; i++) {
+            for(var k = 0; k < GOL.BOARD_SIZE; k++) {
                 var numOfLifeMembers = getNumOfLifeNeighbors(board, i, k);
                 if(board[i][k] === 1) {
                     // handling live cell
@@ -106,7 +111,7 @@ GOL.gameModel = function() {
         toggleDot: toggleDot,
         resetGame: resetGame,
         convertMouseToMap: convertMouseToMap,
-        getBoardCopy: getBoard,
+        copyBoard: copyBoard,
         tick: tick
     };
 }();
@@ -114,7 +119,7 @@ GOL.gameModel = function() {
 GOL.gameDrawer = function(ctx, gameModel) {
     var resetBoard = function() {
         ctx.fillStyle = "#fff";
-        ctx.fillRect(0, 0, 500, 500);
+        ctx.fillRect(0, 0, GOL.DOT_SIZE * GOL.BOARD_SIZE, GOL.DOT_SIZE * GOL.BOARD_SIZE);
     };
 
     var drawBoardOutline = function() {
@@ -122,11 +127,11 @@ GOL.gameDrawer = function(ctx, gameModel) {
         ctx.lineWidth = 0.5;
         ctx.beginPath();
         var i = 0;
-        for(i = 0; i < 50; i++) {
-            ctx.moveTo(i * 10 + 9.5, -0.5);
-            ctx.lineTo(i * 10 + 9.5, 499.5);
-            ctx.moveTo(-0.5, i * 10 + 9.5);
-            ctx.lineTo(499.5, i * 10 + 9.5);
+        for(i = 0; i < GOL.BOARD_SIZE; i++) {
+            ctx.moveTo(i * GOL.DOT_SIZE + GOL.DOT_SIZE - 0.5, -0.5);
+            ctx.lineTo(i * GOL.DOT_SIZE + GOL.DOT_SIZE - 0.5, GOL.DOT_SIZE * GOL.BOARD_SIZE - 0.5);
+            ctx.moveTo(-0.5, i * GOL.DOT_SIZE + GOL.DOT_SIZE - 0.5);
+            ctx.lineTo(GOL.DOT_SIZE * GOL.BOARD_SIZE - 0.5, i * GOL.DOT_SIZE + GOL.DOT_SIZE - 0.5);
             ctx.stroke();
         }
         ctx.closePath();
@@ -134,13 +139,13 @@ GOL.gameDrawer = function(ctx, gameModel) {
 
     var drawDot = function(x, y) {
         ctx.fillStyle = "#000";
-        ctx.fillRect(x * 10 - 0.5, y * 10 - 0.5, 10, 10);
+        ctx.fillRect(x * GOL.DOT_SIZE - 0.5, y * GOL.DOT_SIZE - 0.5, GOL.DOT_SIZE, GOL.DOT_SIZE);
     };
 
     var drawBoard = function() {
-        var board = gameModel.getBoardCopy();
-        for(var i = 0; i < 50; i++) {
-            for(var k = 0; k < 50; k++) {
+        var board = gameModel.copyBoard();
+        for(var i = 0; i < GOL.BOARD_SIZE; i++) {
+            for(var k = 0; k < GOL.BOARD_SIZE; k++) {
                 if(board[i][k] === 1) {
                     drawDot(i, k);
                 }

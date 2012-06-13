@@ -4,13 +4,14 @@ var GOL = GOL ||  {};
 
 GOL.gameModel = function() {
 
+    var BOARD_SIZE = 50;
     var board = undefined;
 
     var initBoard = function() {
-        var newBoard = new Array(50);
-        for (var i = 0; i < 50; i++) {
-            newBoard[i] = new Array(50);
-            for(var k = 0; k < 50; k++) {
+        var newBoard = [];
+        for (var i = 0; i < BOARD_SIZE; i++) {
+            newBoard[i] = [];
+            for(var k = 0; k < BOARD_SIZE; k++) {
                 newBoard[i][k] = 0;
             }
         };
@@ -42,10 +43,10 @@ GOL.gameModel = function() {
     };
 
     var getBoard = function() {
-        var boardCopy = new Array(50);
-        for(var i = 0; i < 50; i++) {
-            boardCopy[i] = new Array(50);
-            for(var k = 0; k < 50; k++) {
+        var boardCopy = [];
+        for(var i = 0; i < BOARD_SIZE; i++) {
+            boardCopy[i] = [];
+            for(var k = 0; k < BOARD_SIZE; k++) {
                 boardCopy[i][k] = board[i][k];
             }
         }
@@ -75,8 +76,8 @@ GOL.gameModel = function() {
         console.log("tick");
         var newBoard = initBoard();
         // implement the game rules
-        for(var i = 0; i < 50; i++) {
-            for(var k = 0; k < 50; k++) {
+        for(var i = 0; i < BOARD_SIZE; i++) {
+            for(var k = 0; k < BOARD_SIZE; k++) {
                 var numOfLifeMembers = getNumOfLifeNeighbors(board, i, k);
                 if(board[i][k] === 1) {
                     // handling live cell
